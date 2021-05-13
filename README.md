@@ -10,10 +10,11 @@
 | ------ | ---- |
 | 471s   | 330s | 
 
-> 开发环境：
-> - Mac mini (2018)
-> - 3.2 GHz 六核Intel Core i7
-> - 16 GB 2667 MHz DDR4
+> 数据测试环境：
+> - Mac：Mac mini (2018) / 3.2 GHz 六核Intel Core i7 / 16 GB 2667 MHz DDR4
+> - Xcode: 12.4
+> - ruby: 2.6.0
+> - cocoapods: 1.10.1
 
 从测试效果可以看出还是有较大提升的，所以开源出来给大家使用一下，可以在 issue 中反馈一下，也可以通过邮箱：cxj83740@126.com 联系我。
 

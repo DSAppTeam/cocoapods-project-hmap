@@ -1,0 +1,3 @@
+module CocoapodsHmapPrebuilt
+  VERSION = "0.0.1"
+end

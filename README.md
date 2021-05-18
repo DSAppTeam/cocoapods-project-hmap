@@ -25,15 +25,17 @@
 ### 使用Gemfile:
 
 如果你的项目使用bundler管理gems，则在你的Gemfile中加入：
-`gem 'cocoapods-project-hmap', :git=>'https://github.com/chenxGen/cocoapods-project-hmap.git'`
+```ruby
+gem 'cocoapods-project-hmap', :git=>'https://github.com/chenxGen/cocoapods-project-hmap.git', :branch=>'main'
+```
 
 ### 源码编译:
 
-```
-git clone https://github.com/chenxGen/cocoapods-project-hmap.git
-cd  cocoapods-project-hmap
-gem build cocoapods-project-hmap.gemspec
-sudo gem install cocoapods-project-hmap-0.0.1.gem
+```shell
+$ git clone https://github.com/chenxGen/cocoapods-project-hmap.git
+$ cd  cocoapods-project-hmap
+$ gem build cocoapods-project-hmap.gemspec
+$ sudo gem install cocoapods-project-hmap-0.0.1.gem
 ```
 
 ## 使用

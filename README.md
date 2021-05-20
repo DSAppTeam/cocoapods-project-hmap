@@ -35,7 +35,7 @@ gem 'cocoapods-project-hmap', :git=>'https://github.com/chenxGen/cocoapods-proje
 $ git clone https://github.com/chenxGen/cocoapods-project-hmap.git
 $ cd  cocoapods-project-hmap
 $ gem build cocoapods-project-hmap.gemspec
-$ sudo gem install cocoapods-project-hmap-0.0.1.gem
+$ sudo gem install cocoapods-project-hmap-0.0.2.gem
 ```
 
 ## 使用

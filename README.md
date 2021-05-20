@@ -26,7 +26,7 @@
 
 如果你的项目使用bundler管理gems，则在你的Gemfile中加入：
 ```ruby
-gem 'cocoapods-project-hmap', :git=>'https://github.com/chenxGen/cocoapods-project-hmap.git', :branch=>'main'
+gem 'cocoapods-project-hmap'
 ```
 
 ### 源码编译:

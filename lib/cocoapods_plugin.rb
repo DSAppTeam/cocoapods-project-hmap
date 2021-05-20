@@ -70,17 +70,18 @@ module Pod
         end
 
         unless hmap.empty?
-          path = Pathname.new(post_context.sandbox_root + "/#{one.name}-hmap.json")
+          path = post_context.sandbox_root + "/#{one.name}-hmap.json"
           path_hmap = post_context.sandbox_root + "/#{one.name}.hmap"
-          path.open('w') { |file| file << hmap.to_json }
-          cmd = "hmap convert #{path.to_s} #{path_hmap}"
-          # convert json to hmap
-          %x[#{cmd}]
+          # write hmap json to file
+          File.open(path, 'w') { |file| file << hmap.to_json }
+          # json to hmap
+          system("hmap convert #{path} #{path_hmap}")
           # delete json file
           File.delete(path)
           # override xcconfig
           one.xcconfigs.each do |config_name, config_file|
             config_file << Hash['OTHER_CFLAGS' => "-I ${PODS_ROOT}/#{one.name}.hmap"]
+            config_file << Hash['OTHER_SWIFT_FLAGS' => "-Xcc -I${PODS_ROOT}/#{one.name}.hmap"]
             config_file.remove_header_search_path
             xcconfig_path = one.xcconfig_path(config_name)
             config_file.save_as(xcconfig_path)

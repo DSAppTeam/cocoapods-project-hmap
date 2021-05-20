@@ -5,9 +5,9 @@ require 'cocoapods-project-hmap/gem_version.rb'
 
 Gem::Specification.new do |spec|
   spec.name          = 'cocoapods-project-hmap'
-  spec.version       = CocoapodsHmapPrebuilt::VERSION
+  spec.version       = CocoapodsProjectHmap::VERSION
   spec.authors       = ['chenxGen']
-  spec.email         = ['cxj83740@126.com']
+  spec.email         = ['chenxGen@outlook.com']
   spec.description   = %q{A short description of cocoapods-project-hmap.}
   spec.summary       = %q{A longer description of cocoapods-project-hmap.}
   spec.homepage      = 'https://github.com/chenxGen/cocoapods-project-hmap'

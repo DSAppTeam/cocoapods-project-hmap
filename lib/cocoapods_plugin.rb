@@ -28,6 +28,8 @@ module ProjectHeaderMap
           if target_hmap.save_to(target_hmap_path)
             target.reset_header_search_with_hmap(target_hmap_name)
           end
+        else
+          Pod::UI.message "- skip handling headers of target :#{target.name}"
         end
       end
 

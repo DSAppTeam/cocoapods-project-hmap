@@ -12,7 +12,7 @@ module Xcodeproj
       if header_search_paths
         new_paths = Array.new
         header_search_paths.split(' ').each do |p|
-          unless p.include?('${PODS_ROOT}/Headers/Public')
+          unless p.include?('${PODS_ROOT}/Headers')
             new_paths << p
           end
         end

@@ -6,7 +6,7 @@ module Pod
       attr_accessor :aggregate_targets
       def self.generate(sandbox, pods_project, aggregate_targets)
         context = super
-        UI.info "[#] generate method of post install hook context override"
+        UI.info "- generate method of post install hook context override"
         context.aggregate_targets = aggregate_targets
         context
       end

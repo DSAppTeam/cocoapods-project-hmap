@@ -53,8 +53,6 @@ module Xcodeproj
     def reset_header_search_with_hmap(hmap_file_name)
       # remove all search paths
       remove_header_search_path
-      # shut down origin use header map option (use plugins generated hmap)
-      set_use_hmap
       # add build flags
       self << Hash['HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{hmap_file_name}"]
     end

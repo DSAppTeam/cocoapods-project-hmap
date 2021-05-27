@@ -8,7 +8,7 @@
 
 | before | hmap |
 | ------ | ---- |
-| 471s   | 330s | 
+| 471s   | 330s |
 
 > 数据测试环境：
 > - Mac：Mac mini (2018) / 3.2 GHz 六核Intel Core i7 / 16 GB 2667 MHz DDR4
@@ -41,3 +41,11 @@ $ sudo gem install cocoapods-project-hmap-0.0.2.gem
 ## 使用
 
 在你的Podfile中加入这一行: `plugin 'cocoapods-project-hmap'`
+
+
+## TODO:
+
+- strict 模式，hmap只提供`import <xxx/xxx.h>`的header， pod target之间也是严格`import <xxx/xxx.h>`
+- long path header ， `import "xxx/xxx/xxx/xxx/xxx.h"`
+- 使用pods多project情况的处理
+- cocoapods版本兼容

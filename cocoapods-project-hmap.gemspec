@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = CocoapodsProjectHmap::VERSION
   spec.authors       = ['chenxGen']
   spec.email         = ['chenxGen@outlook.com']
-  spec.description   = %q{A short description of cocoapods-project-hmap.}
-  spec.summary       = %q{A longer description of cocoapods-project-hmap.}
+  spec.description   = %q{A cocoapods plugin which using hmap instead of header search paths to improve preprocess time.}
+  spec.summary       = %q{A cocoapods plugin which using hmap instead of header search paths to improve preprocess time.}
   spec.homepage      = 'https://github.com/chenxGen/cocoapods-project-hmap'
   spec.license       = 'MIT'
 

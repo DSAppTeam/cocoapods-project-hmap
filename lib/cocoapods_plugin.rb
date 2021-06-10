@@ -14,7 +14,7 @@ module ProjectHeaderMap
       one.pod_targets.each do |target|
         Pod::UI.message "- hanlding headers of target :#{target.name}"
         pods_hmap.add_hmap_with_header_mapping(target.public_header_mappings_by_file_accessor, generate_type, target.name)
-        unless $hmap_black_pod_list.include?(target.name)
+        unless $hmap_black_pod_list.include?(target.name) || $prebuilt_hmap_for_pod_targets == false
           target_hmap = HmapGenerator.new
           # set project header for current target
           target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name)

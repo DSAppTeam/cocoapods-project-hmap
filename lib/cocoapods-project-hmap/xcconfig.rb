@@ -54,7 +54,12 @@ module Xcodeproj
       # remove all search paths
       remove_header_search_path
       # add build flags
-      self << Hash['HEADER_SEARCH_PATHS' => "${PODS_ROOT}/#{hmap_file_name}"]
+      new_paths = Array["${PODS_ROOT}/#{hmap_file_name}"]
+      header_search_paths = @attributes['HEADER_SEARCH_PATHS']
+      if header_search_paths
+        new_paths.concat(header_search_paths.split(' '))
+      end
+      @attributes['HEADER_SEARCH_PATHS'] = new_paths.join(' ')
     end
     def set_use_hmap(use=false)
       @attributes['USE_HEADERMAP'] = (use ? 'YES' : 'NO')

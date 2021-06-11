@@ -1,6 +1,6 @@
 # cocoapods-project-hmap
 
-An cocoapods plugin improving clang build time at preprocess phase by using hmap instead of file paths for header searching. The idea comes from [《一款可以让大型iOS工程编译速度提升50%的工具》](https://tech.meituan.com/2021/02/25/cocoapods-hmap-prebuilt.html)
+A cocoapods plugin to improve compilation speed at preprosessor phase by using hmap instead of file paths for header searching. The idea comes from [《一款可以让大型iOS工程编译速度提升50%的工具》](https://tech.meituan.com/2021/02/25/cocoapods-hmap-prebuilt.html)
 
 ## Benchmark
 

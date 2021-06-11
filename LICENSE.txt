@@ -1,4 +1,4 @@
-Copyright (c) 2021 chenxGen <cxj83740@126.com>
+Copyright (c) 2021 chenxGen <chenxGen@outlook.com>
 
 MIT License
 

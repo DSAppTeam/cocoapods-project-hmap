@@ -1,14 +1,12 @@
 # cocoapods-project-hmap
 
-此插件思路来源于[《一款可以让大型iOS工程编译速度提升50%的工具》](https://tech.meituan.com/2021/02/25/cocoapods-hmap-prebuilt.html)。通过使用hmap代替文件路径搜索优化预处理阶段中头文件搜索的性能实现编译速度提升。
+An cocoapods plugin improving clang build time at preprocess phase by using hmap instead of file paths for header searching. The idea comes from [《一款可以让大型iOS工程编译速度提升50%的工具》](https://tech.meituan.com/2021/02/25/cocoapods-hmap-prebuilt.html)
 
-[English](./REAME_en.md)
+## Benchmark
 
-## 效果测试
+There are some test cases in the benchmark project : [hmap-benchmark](https://github.com/chenxGen/hmap-benchmark/).
 
-我在另一个项目 [hmap-benchmark](https://github.com/chenxGen/hmap-benchmark/) 写了几个测试用例，统计并输出增加M个源文件，N个第三方库在使用和不使用插件的情况下的编译时间.
-
-最新一次跑 `run_benchmark.rb` 脚本的时间统计为:
+The latest outputs by running `run_benchmark.rb` are:
 
 - Mac mini (Intel i7/16g) :
 
@@ -51,32 +49,31 @@
   +--------------------------------------+-------------------+--------------------------------------------------------------------------------------------------------------------+
   ```
 
-从上面的输出日志可以看出，插件可以带来3%-36%的编译速度提升，在使用Intel芯片的机器上优化效果还是挺好的，但是在使用Apple M1芯片的机器上效果就约等于没有了，只能说是M1的性能实在牛批。**如果你用的是M1，这里建议直接 `return`**
+The outputs indicate that this plugin has about 3%-36% build speed improvement, the improvement is not significant on mac using M1 processor because of Apple M1 processor's high IO performance (I GUESS...).
 
-## 环境要求
+**So if you are using Mac with Apple M1 processor, There may be no need to use this plugin.**
+
+## Requirement
 
 - CocoaPods Version: `>=1.7.0`
-- 安装命令行工具 [hmap](https://github.com/milend/hmap) : `brew install milend/taps/hmap`
+- Install command line tool [hmap](https://github.com/milend/hmap) : `brew install milend/taps/hmap`
 
-## 安装
+## Installation
 
-- 使用Gemfile : 在你的 `Gemfile` 中添加: `gem 'cocoapods-project-hmap'`
-- 通过命令行安装 : `sudo gem install cocoapods-project-hmap`
+- With Gemfile : Add this line to your `Gemfile` : `gem 'cocoapods-project-hmap'`
+- With CommandLine : `sudo gem install cocoapods-project-hmap`
 
-## 使用
+## Usage
 
-只需要在你的`Podfile`中调用：`plugin 'cocoapods-project-hmap'` 声明使用该插件。
+In your `Podfile`, add this line : `plugin 'cocoapods-project-hmap'`
 
-同时插件还为`Podfile`提供了一下几个可选的方法调用：
+And this plugin also provides Podfile DSL bellow:
 
-- **set_hmap_black_pod_list:** 开发插件的时候发现有些Pod target使用预生成的hmap编译会出错，比如使用了`#import "a/very/very/long/path/to/header.h"`，暂时没想到好的解决方案，所以针对这种情况需要手动添加到黑名单，不对该target的进行处理，如：`set_hmap_black_pod_list(['PodA','PodB'])`，插件内置了一些这种情况的三方库，具体见：[built-in black list](/lib/cocoapods-project-hmap/podfile_dsl.rb)。如果你还有其他的三方库由于其他原因编译失败，也可以把它添加到黑名单。。。
+- `set_hmap_black_pod_list`: There are some unsolved situation in develping this plugin, such as a 'pod' using a long path import in their code, like `#import "a/very/very/long/path/to/header.h"`, I did not think of a suitable strategy to handle this, so I provide a method to adding then to black list, you can add then with code `set_hmap_black_pod_list(['PodA','PodB'])`, and there are some built-in 'pod' in black list, see : [built-in black list](/lib/cocoapods-project-hmap/podfile_dsl.rb). And if you have some other build error because of this plugin, adding then to black list...
+- `turn_prebuilt_hmap_off_for_pod_targets`: If you have to many build error after using this plugin, or have to add to many 'pod' to black list, I provides a most non-intrusive way to use, call this method `turn_prebuilt_hmap_off_for_pod_targets` to ignore hmap prebuilt for most of the pod target (excepting the 'main' pods, named `Pods-${YOUR SCHEME}`).
+- `set_hmap_use_strict_mode`: Import a header in other library(PodA), strictly speaking, we should use `#import <PodA/Header.h>`, but not all library developer do like that, if you turn it on, you can find then.
 
-- **turn_prebuilt_hmap_off_for_pod_targets:** 如果你发现有太多的三方库需要添加到黑名单，你可以直接通过调用这个方法开启“纯净模式”，关闭插件对Pod Project内部所有target的header处理，仅仅对提供给主项目使用的target处理hmap
-
-- **set_hmap_use_strict_mode:** 在一个target中引用另一个target的header，严格意义上来说应该使用`#import <PodA/Header.h>`的方式，但是有些是通过`#import "Header.h"`，这种情况如果设置了对应的header search path编译是可以成功的，比如使用原生的cocoapods情况下，在项目中使用`#import "Masonry.h"`、`#import <Mansory.h>`和`#import <Masonry/Mansory.h>`三种方式引入都是可以成功的，如果你使用这个插件并且开启这个选项后只有`#import <Masonry/Mansory.h>`可以编译成功。默认为关闭。
-
-
-最终你的Podfile看起来会是这样的 :
+The code in your Podfile may look like that in the end :
 
 ```ruby
 platform :ios, '10.0'
@@ -91,6 +88,10 @@ target 'app' do
   pod 'PodB'
 end
 ```
+
+## Contact
+
+Your can contact me on [Twitter](http://twitter.com/chenxGen).
 
 ## License
 

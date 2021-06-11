@@ -1,92 +1,50 @@
-module Xcodeproj
-  class Config
-    def remove_attr_with_key(key)
-      unless key == nil
-        @attributes.delete(key)
-      end
+# !/usr/bin/env ruby
+
+require 'cocoapods-project-hmap/podfile_dsl'
+require 'cocoapods-project-hmap/pod_target'
+require 'cocoapods-project-hmap/post_install_hook_context'
+require 'cocoapods-project-hmap/hmap_generator'
+
+module ProjectHeaderMap
+  Pod::HooksManager.register('cocoapods-project-hmap', :post_install) do |post_context|
+    generate_type = $strict_mode ? HmapGenerator::ANGLE_BRACKET : HmapGenerator::BOTH
+    hmaps_dir=post_context.sandbox_root +  '/prebuilt-hmaps'
+    unless File.exist?(hmaps_dir)
+        Dir.mkdir(hmaps_dir)
     end
-    def remove_header_search_path
-      remove_attr_with_key('HEADER_SEARCH_PATHS')
-      flags = @attributes['OTHER_CFLAGS']
-      if flags
-        new_flags = ''
-        skip = false
-        flags.split(' ').each do |substr|
-          if skip
-            skip = false
-            next
+
+    post_context.aggregate_targets.each do |one|
+      pods_hmap = HmapGenerator.new
+      Pod::UI.message "- hanlding headers of aggregate target :#{one.name}".green
+      one.pod_targets.each do |target|
+        Pod::UI.message "- hanlding headers of target :#{target.name}"
+        pods_hmap.add_hmap_with_header_mapping(target.public_header_mappings_by_file_accessor, generate_type, target.name)
+        unless $hmap_black_pod_list.include?(target.name) || $prebuilt_hmap_for_pod_targets == false
+          target_hmap = HmapGenerator.new
+          # set project header for current target
+          target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name)
+          target.dependent_targets.each do |depend_target|
+            # set public header for dependent target
+            target_hmap.add_hmap_with_header_mapping(depend_target.public_header_mappings_by_file_accessor, generate_type, depend_target.name)
           end
-          if substr == '-isystem'
-            skip = true
-            next
+
+          target_hmap_name="#{target.name}.hmap"
+          target_hmap_path = hmaps_dir + "/#{target_hmap_name}"
+          relative_hmap_path = "prebuilt-hmaps/#{target_hmap_name}"
+          if target_hmap.save_to(target_hmap_path)
+            target.reset_header_search_with_relative_hmap_path(relative_hmap_path)
           end
-          if new_flags.length > 0
-            new_flags += ' '
-          end
-          new_flags += substr
-        end
-        if new_flags.length > 0
-          @attributes['OTHER_CFLAGS'] = new_flags
         else
-          remove_attr_with_key('OTHER_CFLAGS')
+          Pod::UI.message "- skip handling headers of target :#{target.name}"
         end
       end
-    end
-  end
-end
 
-module Pod
-  class Installer
-    class PostInstallHooksContext
-      attr_accessor :aggregate_targets
-      def self.generate(sandbox, pods_project, aggregate_targets)
-        context = super
-        UI.info "[#] generate method of post install hook context override"
-        context.aggregate_targets = aggregate_targets
-        context
-      end
-    end
-  end
-  module ProjectHeaderMap
-    HooksManager.register('cocoapods-project-hmap', :post_install) do |post_context|
-      post_context.aggregate_targets.each do |one|
-        hmap = Hash.new
-        one.pod_targets.each do |target|
-          target.public_header_mappings_by_file_accessor.each do |facc, headers|
-            headers.each do |key, value|
-              value.each do |path|
-                pn = Pathname.new(path)
-                name = pn.basename.to_s
-                dirname = pn.dirname.to_s + '/'
-                # construct hmap hash info
-                path_info = Hash['suffix' => name, 'prefix' => dirname]
-                # import with quote
-                hmap[name] = path_info
-                # import with angle bracket
-                hmap["#{target.name}/#{name}"] = path_info
-              end
-            end
-          end
-        end
-
-        unless hmap.empty?
-          path = post_context.sandbox_root + "/#{one.name}-hmap.json"
-          path_hmap = post_context.sandbox_root + "/#{one.name}.hmap"
-          # write hmap json to file
-          File.open(path, 'w') { |file| file << hmap.to_json }
-          # json to hmap
-          system("hmap convert #{path} #{path_hmap}")
-          # delete json file
-          File.delete(path)
-          # override xcconfig
-          one.xcconfigs.each do |config_name, config_file|
-            config_file << Hash['OTHER_CFLAGS' => "-I ${PODS_ROOT}/#{one.name}.hmap"]
-            config_file << Hash['OTHER_SWIFT_FLAGS' => "-Xcc -I${PODS_ROOT}/#{one.name}.hmap"]
-            config_file.remove_header_search_path
-            xcconfig_path = one.xcconfig_path(config_name)
-            config_file.save_as(xcconfig_path)
-          end
-        end
+      pods_hmap_name = "#{one.name}.hmap"
+      pods_hmap_path = hmaps_dir + "/#{pods_hmap_name}"
+      relative_hmap_path = "prebuilt-hmaps/#{pods_hmap_name}"
+      if pods_hmap.save_to(pods_hmap_path)
+        # override xcconfig
+        one.reset_header_search_with_relative_hmap_path(relative_hmap_path)
       end
     end
   end

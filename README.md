@@ -2,7 +2,7 @@
 
 此插件思路来源于[《一款可以让大型iOS工程编译速度提升50%的工具》](https://tech.meituan.com/2021/02/25/cocoapods-hmap-prebuilt.html)。通过使用hmap代替文件路径搜索优化预处理阶段中头文件搜索的性能实现编译速度提升。
 
-[English](./REAME_en.md)
+[English](./README_en.md)
 
 ## 效果测试
 

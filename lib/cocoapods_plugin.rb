@@ -8,6 +8,11 @@ require 'cocoapods-project-hmap/hmap_generator'
 module ProjectHeaderMap
   Pod::HooksManager.register('cocoapods-project-hmap', :post_install) do |post_context|
     generate_type = $strict_mode ? HmapGenerator::ANGLE_BRACKET : HmapGenerator::BOTH
+    hmaps_dir=post_context.sandbox_root +  '/prebuilt-hmaps'
+    unless File.exist?(hmaps_dir)
+        Dir.mkdir(hmaps_dir)
+    end
+
     post_context.aggregate_targets.each do |one|
       pods_hmap = HmapGenerator.new
       Pod::UI.message "- hanlding headers of aggregate target :#{one.name}".green
@@ -24,9 +29,10 @@ module ProjectHeaderMap
           end
 
           target_hmap_name="#{target.name}.hmap"
-          target_hmap_path = post_context.sandbox_root + "/#{target_hmap_name}"
+          target_hmap_path = hmaps_dir + "/#{target_hmap_name}"
+          relative_hmap_path = "prebuilt-hmaps/#{target_hmap_name}"
           if target_hmap.save_to(target_hmap_path)
-            target.reset_header_search_with_hmap(target_hmap_name)
+            target.reset_header_search_with_relative_hmap_path(relative_hmap_path)
           end
         else
           Pod::UI.message "- skip handling headers of target :#{target.name}"
@@ -34,10 +40,11 @@ module ProjectHeaderMap
       end
 
       pods_hmap_name = "#{one.name}.hmap"
-      pods_hmap_path = post_context.sandbox_root + "/#{pods_hmap_name}"
+      pods_hmap_path = hmaps_dir + "/#{pods_hmap_name}"
+      relative_hmap_path = "prebuilt-hmaps/#{pods_hmap_name}"
       if pods_hmap.save_to(pods_hmap_path)
         # override xcconfig
-        one.reset_header_search_with_hmap(pods_hmap_name)
+        one.reset_header_search_with_relative_hmap_path(relative_hmap_path)
       end
     end
   end

@@ -50,11 +50,11 @@ module Xcodeproj
         end
       end
     end
-    def reset_header_search_with_hmap(hmap_file_name)
+    def reset_header_search_with_relative_hmap_path(hmap_path)
       # remove all search paths
       remove_header_search_path
       # add build flags
-      new_paths = Array["${PODS_ROOT}/#{hmap_file_name}"]
+      new_paths = Array["${PODS_ROOT}/#{hmap_path}"]
       header_search_paths = @attributes['HEADER_SEARCH_PATHS']
       if header_search_paths
         new_paths.concat(header_search_paths.split(' '))

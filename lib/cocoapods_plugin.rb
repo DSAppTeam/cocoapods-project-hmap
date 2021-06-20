@@ -18,14 +18,14 @@ module ProjectHeaderMap
       Pod::UI.message "- hanlding headers of aggregate target :#{one.name}".green
       one.pod_targets.each do |target|
         Pod::UI.message "- hanlding headers of target :#{target.name}"
-        pods_hmap.add_hmap_with_header_mapping(target.public_header_mappings_by_file_accessor, generate_type, target.name)
+        pods_hmap.add_hmap_with_header_mapping(target.public_header_mappings_by_file_accessor, generate_type, target.name, target.product_module_name)
         unless $hmap_black_pod_list.include?(target.name) || $prebuilt_hmap_for_pod_targets == false
           target_hmap = HmapGenerator.new
           # set project header for current target
-          target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name)
+          target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name, target.product_module_name)
           target.dependent_targets.each do |depend_target|
             # set public header for dependent target
-            target_hmap.add_hmap_with_header_mapping(depend_target.public_header_mappings_by_file_accessor, generate_type, depend_target.name)
+            target_hmap.add_hmap_with_header_mapping(depend_target.public_header_mappings_by_file_accessor, generate_type, depend_target.name, depend_target.product_module_name)
           end
 
           target_hmap_name="#{target.name}.hmap"

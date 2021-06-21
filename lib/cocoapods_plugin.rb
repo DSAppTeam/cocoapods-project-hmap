@@ -3,7 +3,6 @@
 require 'cocoapods-project-hmap/podfile_dsl'
 require 'cocoapods-project-hmap/pod_target'
 require 'cocoapods-project-hmap/post_install_hook_context'
-require 'cocoapods-project-hmap/hmap_generator'
 
 module ProjectHeaderMap
   Pod::HooksManager.register('cocoapods-project-hmap', :post_install) do |post_context|
@@ -23,9 +22,8 @@ module ProjectHeaderMap
           target_hmap = HmapGenerator.new
           # set project header for current target
           target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name, target.product_module_name)
-          target.dependent_targets.each do |depend_target|
-            # set public header for dependent target
-            target_hmap.add_hmap_with_header_mapping(depend_target.public_header_mappings_by_file_accessor, generate_type, depend_target.name, depend_target.product_module_name)
+          if target.respond_to?(:recursively_add_dependent_headers_to_hmap)
+            target.recursively_add_dependent_headers_to_hmap(target_hmap, generate_type)
           end
 
           target_hmap_name="#{target.name}.hmap"

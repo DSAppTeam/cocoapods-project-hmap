@@ -28,7 +28,7 @@ module Pod
           end
         end
       else
-        # PostInstallHooksContext inherit BaseContext, just override `generate`
+        # PostInstallHooksContext inherited from BaseContext, just override `generate`
         def self.generate(sandbox, pods_project, aggregate_targets)
           context = super
           UI.info "- generate method of post install hook context override"

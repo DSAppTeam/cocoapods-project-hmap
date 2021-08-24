@@ -9,7 +9,7 @@ module ProjectHeaderMap
       @hmap = Hash.new
     end
     # header_mapping : [Hash{FileAccessor => Hash}] Hash of file accessors by header mappings.
-    def add_hmap_with_header_mapping(header_mapping, type, target_name=nil)
+    def add_hmap_with_header_mapping(header_mapping, type, target_name=nil, module_name=nil)
       header_mapping.each do |facc, headers|
         headers.each do |key, value|
           value.each do |path|
@@ -22,9 +22,14 @@ module ProjectHeaderMap
               # import with quote
               @hmap[name] = path_info
             end
-            if type & ANGLE_BRACKET > 0 && target_name != nil
-              # import with angle bracket
-              @hmap["#{target_name}/#{name}"] = path_info
+            if type & ANGLE_BRACKET > 0
+              if target_name != nil
+                # import with angle bracket
+                @hmap["#{target_name}/#{name}"] = path_info
+              end
+              if module_name != nil && module_name != target_name
+                @hmap["#{module_name}/#{name}"] = path_info
+              end
             end
           end
         end

@@ -3,7 +3,6 @@
 require 'cocoapods-project-hmap/podfile_dsl'
 require 'cocoapods-project-hmap/pod_target'
 require 'cocoapods-project-hmap/post_install_hook_context'
-require 'cocoapods-project-hmap/hmap_generator'
 
 module ProjectHeaderMap
   Pod::HooksManager.register('cocoapods-project-hmap', :post_install) do |post_context|
@@ -18,14 +17,19 @@ module ProjectHeaderMap
       Pod::UI.message "- hanlding headers of aggregate target :#{one.name}".green
       one.pod_targets.each do |target|
         Pod::UI.message "- hanlding headers of target :#{target.name}"
-        pods_hmap.add_hmap_with_header_mapping(target.public_header_mappings_by_file_accessor, generate_type, target.name)
+        # There is no need to add headers of dynamic framework to hmap.
+        unless target.defines_module? && target.requires_frameworks?
+          pods_hmap.add_hmap_with_header_mapping(target.public_header_mappings_by_file_accessor, generate_type, target.name, target.product_module_name)
+        else
+          Pod::UI.message "- skip dynamic framework: #{target.name}"
+        end
+
         unless $hmap_black_pod_list.include?(target.name) || $prebuilt_hmap_for_pod_targets == false
           target_hmap = HmapGenerator.new
           # set project header for current target
-          target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name)
-          target.dependent_targets.each do |depend_target|
-            # set public header for dependent target
-            target_hmap.add_hmap_with_header_mapping(depend_target.public_header_mappings_by_file_accessor, generate_type, depend_target.name)
+          target_hmap.add_hmap_with_header_mapping(target.header_mappings_by_file_accessor, HmapGenerator::BOTH, target.name, target.product_module_name)
+          if target.respond_to?(:recursively_add_dependent_headers_to_hmap)
+            target.recursively_add_dependent_headers_to_hmap(target_hmap, generate_type)
           end
 
           target_hmap_name="#{target.name}.hmap"

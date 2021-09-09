@@ -52,5 +52,8 @@ module ProjectHeaderMap
         false
       end
     end
+    def empty?
+      @hmap.empty?
+    end
   end
 end

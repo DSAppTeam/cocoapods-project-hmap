@@ -1,14 +1,35 @@
 # !/usr/bin/env ruby
 require 'cocoapods-project-hmap/xcconfig'
 require 'cocoapods-project-hmap/hmap_generator'
+require 'cocoapods-project-hmap/podfile_dsl'
+
+SAVED_HMAP_DIR='prebuilt-hmaps'
 
 module Pod
+  class Target
+    def save_hmap(hmap)
+      if hmap.empty? == false
+        target_hmap_name="#{name}.hmap"
+        relative_hmap_path = "#{SAVED_HMAP_DIR}/#{target_hmap_name}"
+        target_hmap_path = sandbox.root.to_s + "/#{relative_hmap_path}"
+        hmaps_dir = sandbox.root.to_s + "/#{SAVED_HMAP_DIR}"
+        unless File.exist?(hmaps_dir)
+            Dir.mkdir(hmaps_dir)
+        end
+        if hmap.save_to(target_hmap_path)
+          reset_header_search_with_relative_hmap_path(relative_hmap_path)
+        end
+      end
+    end
+  end
+
   class PodTarget
+    attr_accessor :unused_targets
     def reset_header_search_with_relative_hmap_path(hmap_path)
       if build_settings.instance_of?(Hash)
         build_settings.each do |config_name, setting|
           config_file = setting.xcconfig
-          config_file.reset_header_search_with_relative_hmap_path(hmap_path)
+          config_file.reset_header_search_with_relative_hmap_path(hmap_path, @unused_targets.uniq)
           # https://github.com/CocoaPods/CocoaPods/issues/1216
           # just turn off private xcconfig's USE_HEADERMAP flag
           config_file.set_use_hmap(false)
@@ -17,7 +38,7 @@ module Pod
         end
       elsif build_settings.instance_of?(BuildSettings::PodTargetSettings)
         config_file = build_settings.xcconfig
-        config_file.reset_header_search_with_relative_hmap_path(hmap_path)
+        config_file.reset_header_search_with_relative_hmap_path(hmap_path, @unused_targets.uniq)
         # https://github.com/CocoaPods/CocoaPods/issues/1216
         # just turn off private xcconfig's USE_HEADERMAP flag
         config_file.set_use_hmap(false)
@@ -30,8 +51,24 @@ module Pod
     def recursively_add_dependent_headers_to_hmap(hmap, generate_type)
       dependent_targets.each do |depend_target|
         # set public header for dependent target
-        hmap.add_hmap_with_header_mapping(depend_target.public_header_mappings_by_file_accessor, generate_type, depend_target.name, depend_target.product_module_name)
-        depend_target.recursively_add_dependent_headers_to_hmap(hmap, generate_type)
+        depend_target.generate_hmap(hmap, generate_type, true, true) if depend_target.respond_to?(:generate_hmap)
+        @unused_targets.concat(depend_target.unused_targets) unless depend_target.unused_targets.empty?
+      end
+    end
+
+    def generate_hmap(hmap, generate_type, only_public_headers=true, add_dependency=false)
+      @unused_targets = Array.new if @unused_targets == nil
+      # There is no need to add headers of target defines module to hmap.
+      unless defines_module?
+        unless $hmap_black_pod_list.include?(name)
+          Pod::UI.message "- hanlding headers of target :#{name}"
+          # Create hmap for current target if not in black list.
+          hmap.add_hmap_with_header_mapping(only_public_headers ? public_header_mappings_by_file_accessor : header_mappings_by_file_accessor, generate_type, name, product_module_name)
+          # Recursively add dependent targets if needed.
+          recursively_add_dependent_headers_to_hmap(hmap, generate_type) if add_dependency
+        end
+      else
+        @unused_targets << name
       end
     end
   end

@@ -7,13 +7,21 @@ module Xcodeproj
         @attributes.delete(key)
       end
     end
-    def remove_header_search_path
+    def remove_header_search_path(white_list=nil)
       header_search_paths = @attributes['HEADER_SEARCH_PATHS']
       if header_search_paths
         new_paths = Array.new
         header_search_paths.split(' ').each do |p|
-          unless p.include?('${PODS_ROOT}/Headers')
+          if p.include?('${PODS_ROOT}/Headers') == false
+            # retain path not in normal `pod headers` path
             new_paths << p
+          elsif white_list != nil && white_list.empty? == false
+            white_list.each do |white_target_name|
+              if p.include?(white_target_name)
+                new_paths << p
+                break
+              end
+            end
           end
         end
         if new_paths.size > 0
@@ -50,9 +58,9 @@ module Xcodeproj
         end
       end
     end
-    def reset_header_search_with_relative_hmap_path(hmap_path)
+    def reset_header_search_with_relative_hmap_path(hmap_path, white_list=nil)
       # remove all search paths
-      remove_header_search_path
+      remove_header_search_path(white_list)
       # add build flags
       new_paths = Array["${PODS_ROOT}/#{hmap_path}"]
       header_search_paths = @attributes['HEADER_SEARCH_PATHS']

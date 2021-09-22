@@ -7,20 +7,19 @@ module Xcodeproj
         @attributes.delete(key)
       end
     end
-    def remove_header_search_path(white_list=nil)
+    def remove_header_search_path(prebuilt_hmap_target_names=nil)
       header_search_paths = @attributes['HEADER_SEARCH_PATHS']
       if header_search_paths
         new_paths = Array.new
         header_search_paths.split(' ').each do |p|
-          if p.include?('${PODS_ROOT}/Headers') == false
+          if p.include?('${PODS_ROOT}/Headers') == false or p.end_with?('/Private"') or p.end_with?('/Public"')
             # retain path not in normal `pod headers` path
+            # and "${PODS_ROOT}/Headers/Private" "${PODS_ROOT}/Headers/Public"
             new_paths << p
-          elsif white_list != nil && white_list.empty? == false
-            white_list.each do |white_target_name|
-              if p.include?(white_target_name)
-                new_paths << p
-                break
-              end
+          elsif prebuilt_hmap_target_names != nil && prebuilt_hmap_target_names.empty? == false
+            # add path not prebuilt hmap
+            if prebuilt_hmap_target_names.select { |name| p.include?(name) }.empty?
+              new_paths << p
             end
           end
         end

@@ -2,7 +2,7 @@
 # built-in black list pods (long import path not supported
 # you can use hmap_black_pod_list to add other pods
 $hmap_black_pod_list = [
-  'GoogleUtilities',
+  # 'GoogleUtilities',
   'MeshPipe',
   'GoogleDataTransport',
   'FirebaseCoreDiagnostics',

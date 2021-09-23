@@ -1,17 +1,7 @@
 # !/usr/bin/env ruby
-# built-in black list pods (long import path not supported
+# built-in black list pods
 # you can use hmap_black_pod_list to add other pods
-$hmap_black_pod_list = [
-  'GoogleUtilities',
-  'MeshPipe',
-  'GoogleDataTransport',
-  'FirebaseCoreDiagnostics',
-  'FirebaseCore',
-  'FirebaseCrashlytics',
-  'FirebaseInstallations',
-  'CoreDragon',
-  'Objective-LevelDB'
-]
+$hmap_black_pod_list = []
 
 $strict_mode = false
 $prebuilt_hmap_for_pod_targets = true

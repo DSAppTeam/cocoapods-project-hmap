@@ -27,9 +27,16 @@ module Pod
             context
           end
         end
-      else
+      elsif version < Gem::Version.new('1.12.0')
         # PostInstallHooksContext inherited from BaseContext, just override `generate`
         def self.generate(sandbox, pods_project, aggregate_targets)
+          context = super
+          UI.info "- generate method of post install hook context override"
+          context.aggregate_targets = aggregate_targets
+          context
+        end        
+      else
+        def self.generate(sandbox, pods_project, pod_target_subprojects, aggregate_targets)
           context = super
           UI.info "- generate method of post install hook context override"
           context.aggregate_targets = aggregate_targets
